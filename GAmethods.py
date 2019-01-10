@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 # initialisation
-generations=10
+generations=30
 points = 30
 n = 2
 mutation_rate = 0.1
@@ -27,7 +27,6 @@ def initialise(p,n):
     return (x,y)
 
 def crossover(x):
-    fail = 0
     for i in range(points):
         for j in range(n):
             while True:
@@ -36,6 +35,7 @@ def crossover(x):
                 if(a!=b):
                     break
             while True:
+                fail = 0
                 try:
                     x[i][j] = np.random.randint(np.abs(x[b][j]-x[a][j])*1000)/1000 + np.min([x[a][j],x[b][j]])
                 except:
