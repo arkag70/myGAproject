@@ -1,4 +1,8 @@
 git init -> this will initialise .git in your local repo
 git remote add origin "link"
 git pull origin master
+git status
+git add -A
+git commit -m <"your message">
+git push --all
 watch the video at https://youtu.be/xuB1Id2Wxak and further add notes
