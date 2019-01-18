@@ -1,91 +1,84 @@
 import numpy as np
+import string
 import pandas as pd
+import operator
+import matplotlib.pyplot as plt
 
-# initialisation
-generations=30
-points = 30
-n = 2
-mutation_rate = 0.1
+standard='To be or not to be.'
+N=len(standard)
+pop=50
+mu = 0.02
+letters = ' '+string.ascii_letters+string.punctuation
 
-#methods
-def get_cols():
-    cols = ''
-    for i in range(n):
-        cols = cols+' x'+str(i+1)
-    return cols.split()
+def get_word():
 
-def get_sum(x,p,n):
-    s=np.zeros(p)
-    for i in range(p):
-        for j in range(n):
-            s[i]+=x[i,j]**2 - 10*np.cos(2*np.pi*x[i,j])
-    return s
+    word=''
+    for i in range(N):
+        word += letters[np.random.randint(len(letters))]
+    return word
 
-def initialise(p,n):
-    x=10.24*np.random.rand(p,n)-5.12
-    y = 10*n + get_sum(x,p,n)
-    return (x,y)
+def calculate_fitness(word):
+    count=0
+    for j in range(N):
+            if word[j] == standard[j]:
+                count+=1
+    return count
 
-def crossover(x):
-    for i in range(points):
-        for j in range(n):
-            while True:
-                a = np.random.randint(points)
-                b = np.random.randint(points)
-                if(a!=b):
-                    break
-            while True:
-                fail = 0
-                try:
-                    x[i][j] = np.random.randint(np.abs(x[b][j]-x[a][j])*1000)/1000 + np.min([x[a][j],x[b][j]])
-                except:
-                    fail=1
-                finally:
-                    if fail == 0:
-                        break
+def f(x):
+    y=[]
+    for i in range(len(x)):
+        y.append(calculate_fitness(x[i]))
+    return y
 
-    y = 10*n + get_sum(x,points,n)
-    return (x,y)
+#relative fitness
+def g(y):
+    z=[]
+    total_fitness = sum(y)
+    for i in y:
+        try:
+            z.append(i/total_fitness)
+        except:
+            z.append(0)
+    return z
 
-def mutate(x):
-    for i in range(points):
-        for j in range(n):
-            if np.random.randint(10000)/10000 < mutation_rate:
-                x[i][j] = 10.24*np.random.rand()-5.12
-    y = 10*n + get_sum(x,points,n)
-    return (x,y)
+def initialise():
+    x=[]
+    for i in range(pop):
+        x.append(get_word())
+    return x
 
-def regenerate(pop):
-    half = (int) (points/2)
-    #sort the data by its y values in ascending order
-    pop_temp = pop.sort_values(by='y')
+def crossover(x,z):
+    for i in range(len(x)):
+        child=[]
+        a = np.random.randint(pop)
+        b = np.random.randint(pop)
 
-    #eliminate the bottom half with poorer values
-    pop_temp = pop_temp[0:half]
+        cut_point = (int)(N/2)
 
-    #get new values
-    xnew,ynew = initialise(half,n)
+        A = x[a][:cut_point]
+        B = x[a][cut_point:]
+        C = x[b][:cut_point]
+        D = x[b][cut_point:]
 
-    #create x matrix from the existing data frame
-    x = np.matrix(pop_temp.drop(columns='y'))
-    x = np.concatenate((x,xnew))
-    y = 10*n + get_sum(x,points,n)
+        child.append(A+D)
+        child.append(C+B)
+        child.append(D+A)
+        child.append(B+C)
 
-    return x,y
+        cy = f(child)
+        x[i] = child[operator.indexOf(cy,max(cy))]
+    return x
 
-def show(x,y):
-    pop = pd.DataFrame(data = x , columns = get_cols())
-    pop['y'] = y
-    #print(pop)
-    return pop
+def calculate_mut(p):
+    p_lst=[]
+    for i in p:
+        p_lst.append(i)
+    for i in range(len(p_lst)):
+        if np.random.rand()<mu:
+            p_lst[i] = letters[np.random.randint(len(letters))]
+    return ''.join(p_lst)
 
-def genetic_train(x,iterations):
-    print(f'{iterations}')
-    x,y = crossover(x)
-    x,y = mutate(x)
-    pop = show(x,y)
-    x,y = regenerate(pop)
-    if iterations == generations-1:
-        print(f'\nPopulation after generation {iterations}:\n')
-        print(show(x,y))
+def mutation(x):
+    for i in range(len(x)):
+        x[i] = calculate_mut(x[i])
     return x
