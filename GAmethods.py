@@ -1,10 +1,9 @@
 import numpy as np
 import string
-import pandas as pd
 import operator
 import matplotlib.pyplot as plt
 
-standard='To be or not to be.'
+standard='The quick brown fox jumps over the lazy dog'
 N=len(standard)
 pop=50
 mu = 0.02
