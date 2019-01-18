@@ -1,3 +1,3 @@
 # myGAproject
-using genetic algorithm to optimize solutions
-trying to optimize an 'n' variable rastrigin function
+optimize solutions using genetic algorithm
+observing the nature of genetic algorithm while converging to a solution; here it is a phrase or a sentence
